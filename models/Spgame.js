@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 const spgameSchema = new mongoose.Schema({
     title: { type: String, required: true },
     body: { type: String, required: true },
-    date: { type: Date, required: true },
+    date: { type: String, required: true },
     _links: {
         self: { href: String },
         collection: { href: String },

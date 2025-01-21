@@ -45,4 +45,3 @@ app.use('/spgames', spgamesRouter)
 app.listen(process.env.EXPRESS_PORT, () => {
     console.log(`Server is gestart ${process.env.EXPRESS_PORT}`);
 });
-

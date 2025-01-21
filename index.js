@@ -1,9 +1,6 @@
 import express from 'express';
 import mongoose from "mongoose";
-
 import spgamesRouter from "./routes/spgames.js";
-
-import spgame from "./models/Spgame.js";
 
 const app = express();
 mongoose.connect(`mongodb://127.0.0.1:27017/${process.env.DB_NAME}`);
@@ -24,8 +21,6 @@ app.use((req, res, next) =>
     }
 })
 
-
-
 // Middleware voor Accept header validatie
 const acceptJsonMiddleware = (req, res, next) => {
     if (req.headers['accept'] !== 'application/json') {
@@ -35,14 +30,7 @@ const acceptJsonMiddleware = (req, res, next) => {
 };
 
 app.use(acceptJsonMiddleware);
-
-
-
-
-
 app.use('/spgames', spgamesRouter)
-
-
 app.listen(process.env.EXPRESS_PORT, () => {
     console.log(`Server is gestart ${process.env.EXPRESS_PORT}`);
 });

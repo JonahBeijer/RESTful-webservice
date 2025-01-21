@@ -5,7 +5,7 @@ import mongoose from "mongoose";
 
 const router = express.Router();
 
-// Middleware om alleen requests met Accept: application/json toe te staan
+//middleware controleert of de aanvraag JSON accepteert; zo niet, stuurt het een foutmelding terug.
 const acceptJsonMiddleware = (req, res, next) => {
     if (req.headers['accept'] !== 'application/json') {
         return res.status(406).json({error: 'Accept header must be application/json'});
@@ -14,6 +14,8 @@ const acceptJsonMiddleware = (req, res, next) => {
 };
 router.use(acceptJsonMiddleware);
 
+
+//De server staat aanvragen van andere websites toe door headers toe te voegen die toegang, methoden en toegestane headers specificeren
 const corsMiddleware = (req, res, next) => {
     res.header('Access-Control-Allow-Origin', '*'); // Sta toegang toe van alle domeinen
     res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
@@ -21,10 +23,10 @@ const corsMiddleware = (req, res, next) => {
     next();
 };
 
-// Voeg de middleware toe voor alle routes
+
 router.use(corsMiddleware);
 
-// OPTIONS voor de / route
+//De route verwerkt OPTIONS-aanvragen door de toegestane methoden en headers terug te sturen en een lege reactie met status 204 te geven.
 router.options('/', (req, res) => {
     res.header('Allow', 'GET, POST, OPTIONS');
     res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
@@ -32,10 +34,11 @@ router.options('/', (req, res) => {
     res.status(204).send();
 });
 
+//De route verwerkt OPTIONS-aanvragen voor een specifieke id en haalt die id uit de URL-parameters.
 router.options('/:id', async (req, res) => {
     const spgameId = req.params.id;
 
-    // Optioneel: controleer of de resource bestaat in de database (bijvoorbeeld via een GET- of findById-query)
+    // Controleert of de resource bestaat in de database
     const spgame = await SpgameModel.findById(spgameId);
 
     // Als de resource niet bestaat, stuur dan een 404 Not Found-status
@@ -51,6 +54,7 @@ router.options('/:id', async (req, res) => {
 });
 
 
+//De route verwerkt DELETE-aanvragen voor een specifieke id en haalt die id uit de URL-parameters om de bijbehorende gegevens te verwijderen
 router.delete('/:id', async (req, res) => {
     try {
         const { id } = req.params;

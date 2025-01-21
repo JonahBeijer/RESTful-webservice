@@ -83,29 +83,50 @@ router.get('/', async (req, res) => {
     try {
         const baseUrl = "http://145.24.223.60:8001/spgames";
 
-        // Stel standaardwaarden in
-        const page = 1; // Altijd pagina 1
-        const limit = await SpgameModel.countDocuments(); // Stel limit gelijk aan alle items
-        const skip = (page - 1) * limit;
+        // Verkrijg de page en limit parameters uit de querystring, standaard naar 1 en 20
+        let page = parseInt(req.query.page) || 1;
+        let limit = parseInt(req.query.limit) || 20;
 
-        const spgames = await SpgameModel.find().skip(skip).limit(limit);
-        const totalItems = spgames.length;
-        const totalPages = 1; // Altijd 1 pagina
-        const currentItems = spgames.length;
+        // Bereken het totaal aantal items
+        const totalItems = await SpgameModel.countDocuments();
 
-        // Items met de juiste _links-structuur
+        // Als geen page en limit in de querystring staan, haal alles op zonder paginering
+        let spgames;
+        let currentItems = totalItems;
+        let totalPages = 1;
+
+        if (req.query.page && req.query.limit) {
+            // Bereken het aantal pagina's
+            totalPages = Math.ceil(totalItems / limit);
+
+            // Controleer of de page binnen het bereik ligt
+            if (page < 1 || page > totalPages) {
+                return res.status(400).json({ error: 'Page number out of range' });
+            }
+
+            // Haal de gespecificeerde hoeveelheid items op met de limiet en offset
+            const skip = (page - 1) * limit;
+            spgames = await SpgameModel.find().skip(skip).limit(limit);
+            currentItems = spgames.length;
+        } else {
+            // Als geen paginering is ingesteld, haal dan alles op zonder limit
+            spgames = await SpgameModel.find();
+            totalPages = 1; // Zet totaal aantal pagina's naar 1 als er geen paginering is
+        }
+
+        // Maak de items array met links
         const items = spgames.map((spgame) => ({
             id: spgame._id,
             title: spgame.title,
             body: spgame.body,
             date: spgame.date,
             _links: {
-                self: {href: `${baseUrl}/${spgame._id}`},
-                collection: {href: `${baseUrl}/`},
+                self: { href: `${baseUrl}/${spgame._id}` },
+                collection: { href: `${baseUrl}/` },
             },
         }));
 
-        // Paginering links met de juiste structuur
+        // Maak de paginering links
         const pagination = {
             currentPage: page,
             currentItems: currentItems,
@@ -117,31 +138,55 @@ router.get('/', async (req, res) => {
                     href: `${baseUrl}?page=1&limit=${limit}`,
                 },
                 last: {
-                    page: 1,
-                    href: `${baseUrl}?page=1&limit=${limit}`,
+                    page: totalPages,
+                    href: `${baseUrl}?page=${totalPages}&limit=${limit}`,
                 },
-                previous: null,
-                next: null,
+                previous: page > 1 ? {
+                    page: page - 1,
+                    href: `${baseUrl}?page=${page - 1}&limit=${limit}`,
+                } : null,
+                next: page < totalPages ? {
+                    page: page + 1,
+                    href: `${baseUrl}?page=${page + 1}&limit=${limit}`,
+                } : null,
             },
         };
 
-        // Algemene _links structuur
+        // Als geen paginering was, moeten de links correct zijn zonder limit en page
+        if (!req.query.page && !req.query.limit) {
+            pagination._links = {
+                first: {
+                    page: 1,
+                    href: `${baseUrl}`,
+                },
+                last: {
+                    page: 1,
+                    href: `${baseUrl}`,
+                },
+                previous: null,
+                next: null,
+            };
+        }
+
+        // Maak de algemene _links structuur
         const _links = {
-            self: {href: `${baseUrl}/`},
+            self: { href: `${baseUrl}/` },
         };
 
-        // JSON response met de juiste structuur
+        // Geef de JSON response terug
         res.setHeader('Content-Type', 'application/json');
         res.json({
             items,
             _links,
             pagination,
         });
+
     } catch (e) {
         console.error(e);
-        res.status(500).json({error: e.message});
+        res.status(500).json({ error: e.message });
     }
 });
+
 
 // Functie om de Spgame data te formatteren met de juiste structuur
 const formatSpgame = (spgame) => ({

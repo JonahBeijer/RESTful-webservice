@@ -14,9 +14,21 @@ const acceptJsonMiddleware = (req, res, next) => {
 };
 router.use(acceptJsonMiddleware);
 
+const corsMiddleware = (req, res, next) => {
+    res.header('Access-Control-Allow-Origin', '*'); // Sta toegang toe van alle domeinen
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    next();
+};
+
+// Voeg de middleware toe voor alle routes
+router.use(corsMiddleware);
+
 // OPTIONS voor de / route
 router.options('/', (req, res) => {
     res.header('Allow', 'GET, POST, OPTIONS');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
     res.status(204).send();
 });
 
@@ -33,6 +45,8 @@ router.options('/:id', async (req, res) => {
 
     // Hier geef je de toegestane methoden voor de specifieke resource weer
     res.header('Allow', 'GET, PUT, DELETE, OPTIONS');
+    res.header('Access-Control-Allow-Methods', 'GET, PUT, DELETE, OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization' );
     res.status(204).send();  // Geen inhoud, alleen de headers met toegestane methoden
 });
 

@@ -189,16 +189,7 @@ router.get('/', async (req, res) => {
 
 
 // Functie om de Spgame data te formatteren met de juiste structuur
-const formatSpgame = (spgame) => ({
-    id: spgame._id,
-    title: spgame.title,
-    body: spgame.body,
-    date: spgame.date,
-    _links: {
-        self: {href: `http://145.24.223.60:8001/spgames/${spgame._id}`}, // Link naar specifieke resource
-        collection: {href: "http://145.24.223.60:8001/spgames"}, // Link naar de collectie
-    },
-});
+
 router.post('/', async (req, res) => {
     try {
         // Verkrijg de formuliervelden

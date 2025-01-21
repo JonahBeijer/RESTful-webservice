@@ -1,8 +1,9 @@
 import express from 'express';
 import mongoose from "mongoose";
 
-import spotsRouter from "./routes/spgames.js";
-import spgames from "./routes/spgames.js";
+import spgamesRouter from "./routes/spgames.js";
+
+import spgame from "./models/Spgame.js";
 
 const app = express();
 mongoose.connect(`mongodb://127.0.0.1:27017/${process.env.DB_NAME}`);

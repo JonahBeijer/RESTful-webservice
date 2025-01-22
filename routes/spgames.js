@@ -7,7 +7,7 @@ const router = express.Router();
 
 //middleware controleert of de aanvraag JSON accepteert; zo niet, stuurt het een foutmelding terug.
 const acceptJsonMiddleware = (req, res, next) => {
-    if (req.headers['accept'] !== 'application/json') {
+    if (req.headers['accept'] !== 'application/json' && req.method !== "OPTIONS") {
         return res.status(406).json({error: 'Accept header must be application/json'});
     }
     next();

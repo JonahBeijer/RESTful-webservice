@@ -23,7 +23,7 @@ app.use((req, res, next) =>
 
 // Middleware voor Accept header validatie
 const acceptJsonMiddleware = (req, res, next) => {
-    if (req.headers['accept'] !== 'application/json') {
+    if (req.headers['accept'] !== 'application/json' && req.method !== "OPTIONS") {
         return res.status(406).json({ error: 'Accept header must be application/json' });
     }
     next();

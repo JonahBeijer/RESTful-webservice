@@ -18,7 +18,7 @@ router.use(acceptJsonMiddleware);
 //De server staat aanvragen van andere websites toe door headers toe te voegen die toegang, methoden en toegestane headers specificeren
 const corsMiddleware = (req, res, next) => {
     res.header('Access-Control-Allow-Origin', '*'); // Sta toegang toe van alle domeinen
-    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
     res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
     next();
 };
@@ -34,6 +34,8 @@ router.options('/', (req, res) => {
     res.status(204).send();
 });
 
+
+
 //De route verwerkt OPTIONS-aanvragen voor een specifieke id en haalt die id uit de URL-parameters.
 router.options('/:id', async (req, res) => {
     const spgameId = req.params.id;
@@ -47,11 +49,13 @@ router.options('/:id', async (req, res) => {
     }
 
     // Hier geef je de toegestane methoden voor de specifieke resource weer
-    res.header('Allow', 'GET, PUT, DELETE, OPTIONS');
-    res.header('Access-Control-Allow-Methods', 'GET, PUT, DELETE, OPTIONS');
+    res.header('Allow', 'GET, PUT, DELETE, PATCH, OPTIONS');
+    res.header('Access-Control-Allow-Methods', 'GET, PUT, DELETE, PATCH, OPTIONS');
     res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization' );
     res.status(204).send();  // Geen inhoud, alleen de headers met toegestane methoden
 });
+
+
 
 
 //De route verwerkt DELETE-aanvragen voor een specifieke id en haalt die id uit de URL-parameters om de bijbehorende gegevens te verwijderen
@@ -77,6 +81,50 @@ router.delete('/:id', async (req, res) => {
     } catch (e) {
         console.error(e);
         res.status(500).json({ error: 'An error occurred while deleting the spgame' });
+    }
+});
+
+// PATCH route voor gedeeltelijke update van een specifieke spgame
+router.patch('/:id', async (req, res) => {
+    try {
+        const { title, body, date, img_url } = req.body;
+        const spgameId = req.params.id;
+
+        // Zoek de Spgame resource op basis van de id
+        const spgame = await SpgameModel.findById(spgameId);
+
+        // Controleer of de resource bestaat
+        if (!spgame) {
+            return res.status(404).json({ error: 'Spgame not found' });
+        }
+
+        // Werk alleen de velden bij die zijn meegegeven in de request
+        if (title) spgame.title = title;
+        if (body) spgame.body = body;
+        if (date) spgame.date = date;
+        if (img_url) spgame.img_url = img_url;
+
+        // Sla de bijgewerkte resource op in de database
+        await spgame.save();
+
+        // Verzend een succesvolle respons met de bijgewerkte gegevens
+        res.status(200).json({
+            message: 'Spgame updated successfully',
+            spgame: {
+                id: spgame._id,
+                title: spgame.title,
+                body: spgame.body,
+                date: spgame.date,
+                img_url: spgame.img_url,
+                _links: {
+                    self: { href: `http://145.24.223.60:8001/spgames/${spgame._id}` },
+                    collection: { href: "http://145.24.223.60:8001/spgames" },
+                }
+            }
+        });
+    } catch (e) {
+        console.error(e);
+        res.status(500).json({ error: 'Error updating Spgame' });
     }
 });
 
@@ -201,15 +249,18 @@ router.post('/', async (req, res) => {
         const {title, body, date, img_url} = req.body;
 
         // Valideer de velden (bijvoorbeeld, controleer of ze bestaan)
-        if (!title || !body || !date || !img_url) {
+        if (!title || !body || !img_url) {
             return res.status(400).json({error: 'All fields are required'});
         }
+
+        // Stel de datum in als het niet is opgegeven
+        const currentDate = date || new Date();
 
         // Maak een nieuw Spgame-object
         const newSpgame = new SpgameModel({
             title,
             body,
-            date,
+            date: currentDate,
             img_url,
         });
 
@@ -236,6 +287,7 @@ router.post('/', async (req, res) => {
         res.status(500).json({error: 'Error creating Spgame'});
     }
 });
+
 
 router.put('/:id', async (req, res) => {
     try {
@@ -332,7 +384,7 @@ router.post('/seed', async (req, res) => {
             const spgame = new SpgameModel({
                 title: faker.commerce.productName(),
                 body: faker.lorem.sentence(),
-                date: faker.date.recent().toISOString(),
+                date: faker.date.recent(),
                 img_url: faker.image.url({ width: 640, height: 480, category: 'games' }),
             });
 

@@ -124,6 +124,7 @@ router.get('/', async (req, res) => {
             title: spgame.title,
             body: spgame.body,
             date: spgame.date,
+            img_url: spgame.img_url,
             _links: {
                 self: { href: `${baseUrl}/${spgame._id}` },
                 collection: { href: `${baseUrl}/` },
@@ -197,10 +198,10 @@ router.get('/', async (req, res) => {
 router.post('/', async (req, res) => {
     try {
         // Verkrijg de formuliervelden
-        const {title, body, date} = req.body;
+        const {title, body, date, img_url} = req.body;
 
         // Valideer de velden (bijvoorbeeld, controleer of ze bestaan)
-        if (!title || !body || !date) {
+        if (!title || !body || !date || !img_url) {
             return res.status(400).json({error: 'All fields are required'});
         }
 
@@ -209,6 +210,7 @@ router.post('/', async (req, res) => {
             title,
             body,
             date,
+            img_url,
         });
 
         // Sla het object op in de database
@@ -224,6 +226,7 @@ router.post('/', async (req, res) => {
             title: newSpgame.title,
             body: newSpgame.body,
             date: newSpgame.date,
+            img_url: newSpgame.img_url,
             _links: {
                 self: {href: `${baseUrl}/${newSpgame._id}`},
                 collection: {href: baseUrl},
@@ -237,11 +240,11 @@ router.post('/', async (req, res) => {
 router.put('/:id', async (req, res) => {
     try {
         // Verkrijg de resource ID en de nieuwe gegevens van de request body
-        const { title, body, date } = req.body;
+        const { title, body, date, img_url } = req.body;
         const spgameId = req.params.id;
 
         // Valideer de velden (controleer of ze bestaan)
-        if (!title || !body || !date) {
+        if (!title || !body || !date || !img_url) {
             return res.status(400).json({ error: 'All fields are required' });
         }
 
@@ -257,6 +260,7 @@ router.put('/:id', async (req, res) => {
         spgame.title = title;
         spgame.body = body;
         spgame.date = date;
+        spgame.img_url = img_url;
 
         // Sla de bijgewerkte resource op in de database
         await spgame.save();
@@ -269,6 +273,7 @@ router.put('/:id', async (req, res) => {
                 title: spgame.title,
                 body: spgame.body,
                 date: spgame.date,
+                img_url: spgame.img_url,
                 _links: {
                     self: { href: `http://145.24.223.60:8001/spgames/${spgame._id}` },
                     collection: { href: "http://145.24.223.60:8001/spgames" },
@@ -306,6 +311,7 @@ router.get('/:id', async (req, res) => {
             title: spgame.title,
             body: spgame.body,
             date: spgame.date,
+            img_url: spgame.img_url,
             _links: {
                 self: {href: `http://145.24.223.60:8001/spgames/${spgame._id}`},
                 collection: {href: "http://145.24.223.60:8001/spgames"},
@@ -327,6 +333,7 @@ router.post('/seed', async (req, res) => {
                 title: faker.commerce.productName(),
                 body: faker.lorem.sentence(),
                 date: faker.date.recent().toISOString(),
+                img_url: faker.image.url({ width: 640, height: 480, category: 'games' }),
             });
 
             await spgame.save();

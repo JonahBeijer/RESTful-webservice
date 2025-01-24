@@ -34,8 +34,6 @@ router.options('/', (req, res) => {
     res.status(204).send();
 });
 
-
-
 //De route verwerkt OPTIONS-aanvragen voor een specifieke id en haalt die id uit de URL-parameters.
 router.options('/:id', async (req, res) => {
     const spgameId = req.params.id;
@@ -54,8 +52,6 @@ router.options('/:id', async (req, res) => {
     res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization' );
     res.status(204).send();  // Geen inhoud, alleen de headers met toegestane methoden
 });
-
-
 
 
 //De route verwerkt DELETE-aanvragen voor een specifieke id en haalt die id uit de URL-parameters om de bijbehorende gegevens te verwijderen

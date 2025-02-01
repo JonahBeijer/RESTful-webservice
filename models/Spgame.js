@@ -5,6 +5,7 @@ const spgameSchema = new mongoose.Schema({
     body: { type: String, required: true },
     date: { type: String, required: true },
     img_url: { type: String, required: true },
+    review: { type: String, required: true },
     _links: {
         self: { href: String },
         collection: { href: String },

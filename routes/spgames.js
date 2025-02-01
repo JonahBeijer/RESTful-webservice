@@ -83,7 +83,7 @@ router.delete('/:id', async (req, res) => {
 // PATCH route voor gedeeltelijke update van een specifieke spgame
 router.patch('/:id', async (req, res) => {
     try {
-        const { title, body, date, img_url } = req.body;
+        const { title, body, date, img_url, review } = req.body;
         const spgameId = req.params.id;
 
         // Zoek de Spgame resource op basis van de id
@@ -99,6 +99,7 @@ router.patch('/:id', async (req, res) => {
         if (body) spgame.body = body;
         if (date) spgame.date = date;
         if (img_url) spgame.img_url = img_url;
+        if (review) spgame.review = review;
 
         // Sla de bijgewerkte resource op in de database
         await spgame.save();
@@ -112,6 +113,7 @@ router.patch('/:id', async (req, res) => {
                 body: spgame.body,
                 date: spgame.date,
                 img_url: spgame.img_url,
+                review: spgame.review,
                 _links: {
                     self: { href: `http://145.24.223.60:8001/spgames/${spgame._id}` },
                     collection: { href: "http://145.24.223.60:8001/spgames" },
@@ -169,6 +171,7 @@ router.get('/', async (req, res) => {
             body: spgame.body,
             date: spgame.date,
             img_url: spgame.img_url,
+            review: spgame.review,
             _links: {
                 self: { href: `${baseUrl}/${spgame._id}` },
                 collection: { href: `${baseUrl}/` },
@@ -242,10 +245,10 @@ router.get('/', async (req, res) => {
 router.post('/', async (req, res) => {
     try {
         // Verkrijg de formuliervelden
-        const {title, body, date, img_url} = req.body;
+        const {title, body, date, img_url, review} = req.body;
 
         // Valideer de velden (bijvoorbeeld, controleer of ze bestaan)
-        if (!title || !body || !img_url) {
+        if (!title || !body || !img_url || !date || !review) {
             return res.status(400).json({error: 'All fields are required'});
         }
 
@@ -258,6 +261,7 @@ router.post('/', async (req, res) => {
             body,
             date: currentDate,
             img_url,
+            review
         });
 
         // Sla het object op in de database
@@ -274,6 +278,7 @@ router.post('/', async (req, res) => {
             body: newSpgame.body,
             date: newSpgame.date,
             img_url: newSpgame.img_url,
+            review: newSpgame.review,
             _links: {
                 self: {href: `${baseUrl}/${newSpgame._id}`},
                 collection: {href: baseUrl},
@@ -288,11 +293,11 @@ router.post('/', async (req, res) => {
 router.put('/:id', async (req, res) => {
     try {
         // Verkrijg de resource ID en de nieuwe gegevens van de request body
-        const { title, body, date, img_url } = req.body;
+        const { title, body, date, img_url, review } = req.body;
         const spgameId = req.params.id;
 
         // Valideer de velden (controleer of ze bestaan)
-        if (!title || !body || !date || !img_url) {
+        if (!title || !body || !date || !img_url || !review ) {
             return res.status(400).json({ error: 'All fields are required' });
         }
 
@@ -309,6 +314,8 @@ router.put('/:id', async (req, res) => {
         spgame.body = body;
         spgame.date = date;
         spgame.img_url = img_url;
+        spgame.review = review;
+
 
         // Sla de bijgewerkte resource op in de database
         await spgame.save();
@@ -322,6 +329,7 @@ router.put('/:id', async (req, res) => {
                 body: spgame.body,
                 date: spgame.date,
                 img_url: spgame.img_url,
+                review: spgame.review,
                 _links: {
                     self: { href: `http://145.24.223.60:8001/spgames/${spgame._id}` },
                     collection: { href: "http://145.24.223.60:8001/spgames" },
@@ -360,6 +368,7 @@ router.get('/:id', async (req, res) => {
             body: spgame.body,
             date: spgame.date,
             img_url: spgame.img_url,
+            review: spgame.review,
             _links: {
                 self: {href: `http://145.24.223.60:8001/spgames/${spgame._id}`},
                 collection: {href: "http://145.24.223.60:8001/spgames"},
@@ -382,6 +391,7 @@ router.post('/seed', async (req, res) => {
                 body: faker.lorem.sentence(),
                 date: faker.date.recent(),
                 img_url: faker.image.url({ width: 640, height: 480, category: 'games' }),
+                review: faker.lorem.sentence(),
             });
 
             await spgame.save();

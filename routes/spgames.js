@@ -401,6 +401,34 @@ router.post('/seed', async (req, res) => {
     } catch (e) {
         res.status(500).json({error: 'Error seeding data'});
     }
+
+
+
 });
+
+router.delete('/range/:start/:end', async (req, res) => {
+    try {
+        const { start, end } = req.params;
+
+        if (!mongoose.Types.ObjectId.isValid(start) || !mongoose.Types.ObjectId.isValid(end)) {
+            return res.status(400).json({ error: 'Invalid ObjectId format' });
+        }
+
+        const result = await SpgameModel.deleteMany({
+            _id: {
+                $gte: new mongoose.Types.ObjectId(start),
+                $lte: new mongoose.Types.ObjectId(end)
+            }
+        });
+
+        res.status(200).json({
+            message: `Deleted ${result.deletedCount} games from ID ${start} to ${end}`
+        });
+    } catch (e) {
+        console.error(e);
+        res.status(500).json({ error: 'An error occurred while deleting the games' });
+    }
+});
+
 
 export default router;
